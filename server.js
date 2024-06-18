@@ -1,5 +1,6 @@
 const express = require('express');
 const axios = require('axios');
+const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -7,13 +8,10 @@ const RAPIDAPI_KEY = '662b211a18mshd967c914cb7c5bbp14ad52jsne18f29da34a3';
 const RAPIDAPI_HOST = 'ebay32.p.rapidapi.com';
 
 app.use(express.json());
-
-app.get('/', (req, res) => {
-  res.send('Shopping Assistant Bot Server is running');
-});
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/search', async (req, res) => {
-  const { query } = req.body;
+  const { query, sortBy } = req.body;
   console.log(`Received search request for query: ${query}`);
   const options = {
     method: 'GET',
