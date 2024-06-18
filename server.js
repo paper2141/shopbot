@@ -24,7 +24,7 @@ app.post('/search', async (req, res) => {
 
   try {
     const response = await axios.request(options);
-    console.log('API response:', response.data); // 응답 데이터 로그 추가
+    console.log('API response:', response.data);
     res.json(response.data);
   } catch (error) {
     console.error('API request error:', error);
