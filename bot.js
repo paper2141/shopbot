@@ -16,7 +16,7 @@ bot.onText(/\/search (.+)/, async (msg, match) => {
   const query = match[1];
   console.log(`Received /search command with query: ${query}`);
   try {
-    const response = await axios.post('http://localhost:3000/search', { query });
+    const response = await axios.post('https://vercel.com/papers-projects-7696558b/shopbot', { query });
     console.log('API response in bot:', response.data); // 봇에서도 응답 로그 추가
 
     let products = response.data.products || []; // products가 undefined일 경우 빈 배열로 설정
@@ -64,4 +64,8 @@ bot.onText(/\/search (.+)/, async (msg, match) => {
     console.error('Error processing /search command:', error);
     bot.sendMessage(chatId, `Error: ${error.toString()}`);
   }
+});
+
+bot.on("polling_error", (error) => {
+  console.error(`Polling error: ${error.code} - ${error.message}`);
 });
