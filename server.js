@@ -14,27 +14,9 @@ app.post('/search', async (req, res) => {
   const { query, sortBy } = req.body;
   console.log(`Received search request for query: ${query}, sortBy: ${sortBy}`);
   
-  let sortParam = '';
-  switch (sortBy) {
-    case 'priceAsc':
-      sortParam = '&sort=price_asc';
-      break;
-    case 'priceDesc':
-      sortParam = '&sort=price_desc';
-      break;
-    case 'reviews':
-      sortParam = '&sort=reviews';
-      break;
-    case 'sales':
-      sortParam = '&sort=sales';
-      break;
-    default:
-      sortParam = '';
-  }
-  
   const options = {
     method: 'GET',
-    url: `https://${RAPIDAPI_HOST}/search/${encodeURIComponent(query)}?page=1&country=germany&country_code=de${sortParam}`,
+    url: `https://${RAPIDAPI_HOST}/search/${encodeURIComponent(query)}?page=1&country=germany&country_code=de`,
     headers: {
       'x-rapidapi-key': RAPIDAPI_KEY,
       'x-rapidapi-host': RAPIDAPI_HOST
@@ -43,8 +25,19 @@ app.post('/search', async (req, res) => {
 
   try {
     const response = await axios.request(options);
-    console.log('API response:', response.data);
-    res.json(response.data);
+    let products = response.data.products || [];
+
+    // 정렬 처리
+    if (sortBy === 'priceAsc') {
+      products.sort((a, b) => (a.price ? a.price.value : Infinity) - (b.price ? b.price.value : Infinity));
+    } else if (sortBy === 'priceDesc') {
+      products.sort((a, b) => (b.price ? b.price.value : 0) - (a.price ? a.price.value : 0));
+    } else if (sortBy === 'reviews') {
+      products.sort((a, b) => (b.reviews ? b.reviews.count : 0) - (a.reviews ? a.reviews.count : 0));
+    }
+
+    console.log('API response:', products);
+    res.json({ products });
   } catch (error) {
     console.error('API request error:', error);
     res.status(500).send(error.toString());
