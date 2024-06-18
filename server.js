@@ -12,10 +12,29 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/search', async (req, res) => {
   const { query, sortBy } = req.body;
-  console.log(`Received search request for query: ${query}`);
+  console.log(`Received search request for query: ${query}, sortBy: ${sortBy}`);
+  
+  let sortParam = '';
+  switch (sortBy) {
+    case 'priceAsc':
+      sortParam = '&sort=price_asc';
+      break;
+    case 'priceDesc':
+      sortParam = '&sort=price_desc';
+      break;
+    case 'reviews':
+      sortParam = '&sort=reviews';
+      break;
+    case 'sales':
+      sortParam = '&sort=sales';
+      break;
+    default:
+      sortParam = '';
+  }
+  
   const options = {
     method: 'GET',
-    url: `https://${RAPIDAPI_HOST}/search/${encodeURIComponent(query)}?page=1&country=germany&country_code=de`,
+    url: `https://${RAPIDAPI_HOST}/search/${encodeURIComponent(query)}?page=1&country=germany&country_code=de${sortParam}`,
     headers: {
       'x-rapidapi-key': RAPIDAPI_KEY,
       'x-rapidapi-host': RAPIDAPI_HOST
@@ -24,7 +43,7 @@ app.post('/search', async (req, res) => {
 
   try {
     const response = await axios.request(options);
-    console.log('API response:', response.data); // 응답 데이터 로그 추가
+    console.log('API response:', response.data);
     res.json(response.data);
   } catch (error) {
     console.error('API request error:', error);

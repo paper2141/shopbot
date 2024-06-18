@@ -1,7 +1,17 @@
+require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 const axios = require('axios');
-const TOKEN = '7016857184:AAGErm1U9xWlKLWl9gDl4iBpBcy1vLUfsv4';
+const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+
+if (!TOKEN) {
+  throw new Error("Telegram Bot Token not provided!");
+}
+
 const bot = new TelegramBot(TOKEN, { polling: true });
+
+bot.on('polling_error', (error) => {
+  console.error('Polling error:', error.code, error.message);
+});
 
 function jaccardSimilarity(str1, str2) {
   const set1 = new Set(str1.toLowerCase().split(' '));
