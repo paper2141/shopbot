@@ -1,45 +1,35 @@
-// 기존 코드와 동일한 파일을 수정합니다.
 const express = require('express');
-const bodyParser = require('body-parser');
 const axios = require('axios');
 const app = express();
-const port = 3000;
+const PORT = process.env.PORT || 3000;
 
-app.use(bodyParser.json());
-app.use(express.static('public'));
+const RAPIDAPI_KEY = '662b211a18mshd967c914cb7c5bbp14ad52jsne18f29da34a3';
+const RAPIDAPI_HOST = 'ebay32.p.rapidapi.com';
+
+app.use(express.json());
 
 app.post('/search', async (req, res) => {
-  const { query, sortBy } = req.body;
-  const apiUrl = `https://ebay32.p.rapidapi.com/search/${encodeURIComponent(query)}`;
-  
-  try {
-    const response = await axios.get(apiUrl, {
-      headers: {
-        'x-rapidapi-key': '662b211a18mshd967c914cb7c5bbp14ad52jsne18f29da34a3',
-        'x-rapidapi-host': 'ebay32.p.rapidapi.com'
-      }
-    });
-
-    let products = response.data.products;
-
-    // Sort products based on the selected criteria
-    if (sortBy === 'priceAsc') {
-      products = products.sort((a, b) => a.price.value - b.price.value);
-    } else if (sortBy === 'priceDesc') {
-      products = products.sort((a, b) => b.price.value - a.price.value);
-    } else if (sortBy === 'reviews') {
-      products = products.sort((a, b) => b.reviews - a.reviews);
-    } else if (sortBy === 'sales') {
-      products = products.sort((a, b) => b.sales - a.sales);
+  const { query } = req.body;
+  console.log(`Received search request for query: ${query}`);
+  const options = {
+    method: 'GET',
+    url: `https://${RAPIDAPI_HOST}/search/${encodeURIComponent(query)}?page=1&country=germany&country_code=de`,
+    headers: {
+      'x-rapidapi-key': RAPIDAPI_KEY,
+      'x-rapidapi-host': RAPIDAPI_HOST
     }
+  };
 
-    res.json({ products: products.slice(0, 20) });
+  try {
+    const response = await axios.request(options);
+    console.log('API response:', response.data); // 응답 데이터 로그 추가
+    res.json(response.data);
   } catch (error) {
-    console.error('Error fetching products:', error);
-    res.status(500).send('Error fetching products');
+    console.error('API request error:', error);
+    res.status(500).send(error.toString());
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
