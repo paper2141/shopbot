@@ -8,6 +8,10 @@ const RAPIDAPI_HOST = 'ebay32.p.rapidapi.com';
 
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.send('Shopping Assistant Bot Server is running');
+});
+
 app.post('/search', async (req, res) => {
   const { query } = req.body;
   console.log(`Received search request for query: ${query}`);
