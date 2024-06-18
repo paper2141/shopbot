@@ -18,6 +18,9 @@
       margin: 0 auto;
       padding: 20px;
       text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      background: #fff;
+      border-radius: 8px;
     }
     h1 {
       font-weight: 600;
@@ -63,6 +66,10 @@
       max-width: 120px;
       margin-right: 20px;
       border-radius: 8px;
+      transition: transform 0.2s ease-in-out;
+    }
+    .product img:hover {
+      transform: scale(1.05);
     }
     .product-details {
       text-align: left;
@@ -87,6 +94,28 @@
     .product-details a:hover {
       text-decoration: underline;
     }
+    .loading-spinner {
+      border: 16px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 16px solid #3498db;
+      width: 120px;
+      height: 120px;
+      animation: spin 2s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .filters {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .filters label {
+      font-size: 16px;
+      color: #333;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
@@ -103,13 +132,27 @@
       </select>
       <button onclick="searchProducts()">Search</button>
     </div>
+    <div class="filters">
+      <label>
+        <input type="checkbox" id="price-available" checked>
+        Price Available
+      </label>
+    </div>
     <div id="results"></div>
+    <div id="loading-spinner" class="loading-spinner" style="display: none;"></div>
   </div>
 
   <script>
     async function searchProducts() {
       const query = document.getElementById('search-query').value;
       const sortBy = document.getElementById('sort-by').value;
+      const results = document.getElementById('results');
+      const spinner = document.getElementById('loading-spinner');
+
+      // Clear previous results and show loading spinner
+      results.innerHTML = '';
+      spinner.style.display = 'block';
+
       const response = await fetch('/search', {
         method: 'POST',
         headers: {
@@ -119,12 +162,19 @@
       });
       const data = await response.json();
       displayResults(data.products);
+
+      // Hide loading spinner
+      spinner.style.display = 'none';
     }
 
     function displayResults(products) {
       const results = document.getElementById('results');
+      const priceAvailable = document.getElementById('price-available').checked;
+      
       results.innerHTML = '';
       products.forEach(product => {
+        if (priceAvailable && !product.price) return;
+
         const productElement = document.createElement('div');
         productElement.className = 'product';
         productElement.innerHTML = `
